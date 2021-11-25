@@ -4,8 +4,6 @@ const app = express();
 const cors = require("cors");
 const socketIO = require("socket.io");
 
-app.use(cors());
-
 require("dotenv").config();
 
 const PORT = process.env.PORT || 8080;
@@ -15,13 +13,23 @@ const options = {
   cert: process.env.PUBLIC_KEY.replace(/\\n/g, "\n"),
 };
 
-const server = https.createServer(options, app);
-
-const io = socketIO.listen(server);
-
 let users = {};
 let socketToRoom = {};
 const maximum = 2;
+
+const corsOption = {
+  origin:
+    process.env.NODE_ENV === "development"
+      ? "http://localhost:3000"
+      : "https://withbbang.github.io",
+  credentials: true,
+};
+
+app.use(cors(corsOption));
+
+const server = https.createServer(options, app);
+
+const io = socketIO.listen(server);
 
 io.on("connection", (socket) => {
   socket.on("join_room", (data) => {
